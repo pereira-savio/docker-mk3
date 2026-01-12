@@ -3,7 +3,7 @@ services:
   portainer:
     restart: always
     container_name: portainer
-    image: portainer/portainer
+    image: portainer/portainer-ce:latest
     ports:
       - 9000:9000
       - 8000:8000
