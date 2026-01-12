@@ -8,7 +8,9 @@ network:
 	@docker network create -d bridge global-default 2>/dev/null || true
 
 portainer:
-	@./.make/cmd.sh -f container-visibility/docker-compose-portainer.yaml up -d
+	@./.make/cmd.sh -f container-visibility/docker-compose.yml up -d
+portainer-down:
+	@docker rm -f portainer 2>/dev/null || true
 
 #Databases
 mariadb: network
