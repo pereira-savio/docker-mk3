@@ -45,6 +45,11 @@ redis-insight:
 kafka:
 	@./.make/cmd.sh -f kafka/docker-compose-kafka.yaml up -d
 
+rabbitmq:
+	@./.make/cmd.sh -f queues/docker-compose-rabbitmq.yaml up -d
+rabbitmq-down:
+	@docker rm -f rabbitmq 2>/dev/null || true
+
 #Mock
 mock:
 	@./.make/cmd.sh -f mock/docker-compose.yaml up -d
