@@ -76,4 +76,8 @@ drone-logs:
 drone-restart:
 	@./.make/cmd.sh -f ci-cd/docker-compose.yml restart
 
+# VPN
+openvpn:
+	@./.make/cmd.sh -f vpn/docker-compose.yml up -d
+
 .PHONY: all
