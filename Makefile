@@ -13,12 +13,20 @@ portainer:
 #Databases
 mariadb: network
 	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mariadb.yaml up -d
+mariadb-down:
+	@docker rm -f mariadb 2>/dev/null || true
 mysql: network
 	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mysql.yaml up -d
+mysql-down:
+	@docker rm -f mysql 2>/dev/null || true
 postgres: network
 	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-postgres.yaml up -d
+postgres-down:
+	@docker rm -f postgres pgadmin 2>/dev/null || true
 mongo: network
 	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mongo.yaml up -d
+mongo-down:
+	@docker rm -f mongodb mongodb-express 2>/dev/null || true
 
 #ElasticSearch
 elasticsearch:
