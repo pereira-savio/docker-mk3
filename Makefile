@@ -1,23 +1,24 @@
 # Recipes
 all: init
 
-init:
+init: network
 	make mariadb
 network:
-	@docker network create -d bridge global-default
+	@docker network create -d bridge databases-network 2>/dev/null || true
+	@docker network create -d bridge global-default 2>/dev/null || true
 
 portainer:
 	@./.make/cmd.sh -f container-visibility/docker-compose-portainer.yaml up -d
 
 #Databases
-mariadb:
-	@./.make/cmd.sh -f databases/docker-compose-mariadb.yaml up -d
-mysql:
-	@./.make/cmd.sh -f databases/docker-compose-mysql.yaml up -d
-postgres:
-	@./.make/cmd.sh -f databases/docker-compose-postgres.yaml up -d
-mongo:
-	@./.make/cmd.sh -f databases/docker-compose-mongo.yaml up -d
+mariadb: network
+	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mariadb.yaml up -d
+mysql: network
+	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mysql.yaml up -d
+postgres: network
+	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-postgres.yaml up -d
+mongo: network
+	@./.make/cmd.sh -f databases/docker-compose.yml -f databases/docker-compose-mongo.yaml up -d
 
 #ElasticSearch
 elasticsearch:

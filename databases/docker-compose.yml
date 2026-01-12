@@ -1,0 +1,6 @@
+networks:
+  databases-network:
+    driver: bridge
+
+# Este arquivo define a rede compartilhada para todos os bancos de dados
+# Inclua este arquivo ao usar os outros com: docker-compose -f docker-compose.yml -f docker-compose-postgres.yaml -f docker-compose-mariadb.yaml -f docker-compose-mongo.yaml up

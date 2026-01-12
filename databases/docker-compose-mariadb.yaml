@@ -13,7 +13,7 @@ services:
     volumes:
       - mariadb-data:/var/lib/mysql
     networks:
-      - global-default
+      - databases-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -25,5 +25,5 @@ volumes:
   mariadb-data:
 
 networks:
-  global-default:
+  databases-network:
     external: true
