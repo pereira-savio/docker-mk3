@@ -80,4 +80,17 @@ drone-restart:
 openvpn:
 	@./.make/cmd.sh -f vpn/docker-compose.yml up -d
 
+openvpn-down:
+	@docker rm -f openvpn-as 2>/dev/null || true
+
+openvpn-logs:
+	@docker logs -f openvpn-as
+
+openvpn-change-password:
+	@echo "Digite a nova senha para o usuário 'openvpn':"
+	@read -p "Nova senha: " senha && docker exec openvpn-as /usr/local/openvpn_as/scripts/confdba -u -p openvpn -k pass -v "$$senha" && echo "✅ Senha alterada com sucesso!"
+
+openvpn-users:
+	@docker exec openvpn-as /usr/local/openvpn_as/scripts/userdba --show
+
 .PHONY: all
