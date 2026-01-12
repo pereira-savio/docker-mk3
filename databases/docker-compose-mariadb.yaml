@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb:11.2-alpine
+    image: mariadb:11.2
     hostname: mariadb
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
@@ -21,18 +19,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
-
-  adminer:
-    image: adminer:4.8.1-standalone
-    container_name: adminer
-    ports:
-      - "8005:8080"
-    networks:
-      - global-default
-    depends_on:
-      mariadb:
-        condition: service_healthy
     restart: unless-stopped
 
 volumes:
