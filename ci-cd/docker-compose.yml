@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  drone-server:
+    image: drone/drone:latest
+    container_name: drone-server
+    ports:
+      - "8080:80"
+    environment:
+      # Configuração básica
+      DRONE_SERVER_HOST: localhost:8080
+      DRONE_SERVER_PROTO: http
+
+      # Provedor Git (escolha um)
+      # Para GitHub
+      DRONE_GITHUB_SERVER: https://github.com
+      DRONE_GITHUB_CLIENT_ID: ${DRONE_GITHUB_CLIENT_ID:-}
+      DRONE_GITHUB_CLIENT_SECRET: ${DRONE_GITHUB_CLIENT_SECRET:-}
+
+      # Para GitLab
+      # DRONE_GITLAB_SERVER: https://gitlab.com
+      # DRONE_GITLAB_CLIENT_ID: ${DRONE_GITLAB_CLIENT_ID:-}
+      # DRONE_GITLAB_CLIENT_SECRET: ${DRONE_GITLAB_CLIENT_SECRET:-}
+
+      # Para Gitea
+      # DRONE_GITEA_SERVER: http://gitea:3000
+      # DRONE_GITEA_CLIENT_ID: ${DRONE_GITEA_CLIENT_ID:-}
+      # DRONE_GITEA_CLIENT_SECRET: ${DRONE_GITEA_CLIENT_SECRET:-}
+
+      # RPC Secret (para comunicação com runners)
+      DRONE_RPC_SECRET: ${DRONE_RPC_SECRET:-drone-secret-key}
+
+      # Banco de dados (SQLite por padrão)
+      DRONE_DATABASE_DRIVER: sqlite
+      DRONE_DATABASE_DATASOURCE: /data/drone.db
+
+      # Admin users
+      DRONE_USER_CREATE: username:admin,admin:true
+
+      # Logs
+      DRONE_LOGS_PRETTY: "true"
+      DRONE_LOGS_COLOR: "true"
+    volumes:
+      - drone-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - drone-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  drone-runner:
+    image: drone/drone-runner-docker:latest
+    container_name: drone-runner
+    ports:
+      - "3000:3000"
+    environment:
+      # Configuração do Runner
+      DRONE_RPC_HOST: drone-server
+      DRONE_RPC_PROTO: http
+      DRONE_RPC_SECRET: ${DRONE_RPC_SECRET:-drone-secret-key}
+
+      # Capacidade de runners
+      DRONE_RUNNER_CAPACITY: 2
+      DRONE_RUNNER_NAME: docker-runner-01
+
+      # Logs
+      DRONE_LOGS_PRETTY: "true"
+      DRONE_LOGS_COLOR: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - drone-network
+    depends_on:
+      drone-server:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Opcional: PostgreSQL para persistência melhorada
+  # Descomente se quiser usar PostgreSQL em vez de SQLite
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: drone-postgres
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER:-drone}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-drone-password}
+  #     POSTGRES_DB: ${POSTGRES_DB:-drone}
+  #   volumes:
+  #     - drone-postgres-data:/var/lib/postgresql/data
+  #   networks:
+  #     - drone-network
+  #   restart: unless-stopped
+
+volumes:
+  drone-data:
+  # drone-postgres-data:
+
+networks:
+  drone-network:
+    driver: bridge

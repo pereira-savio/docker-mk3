@@ -47,4 +47,17 @@ aws-sqs:
 sonarqube:
 	@./.make/cmd.sh -f qa/docker-compose-sonarqube.yaml up -d
 
-.PHONY: all 
+# CI/CD
+drone:
+	@./.make/cmd.sh -f ci-cd/docker-compose.yml up -d
+
+drone-down:
+	@./.make/cmd.sh -f ci-cd/docker-compose.yml down
+
+drone-logs:
+	@docker-compose -f ci-cd/docker-compose.yml logs -f
+
+drone-restart:
+	@./.make/cmd.sh -f ci-cd/docker-compose.yml restart
+
+.PHONY: all

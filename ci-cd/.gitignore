@@ -1,0 +1,23 @@
+# Variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# Dados do Docker
+drone-data/
+drone-postgres-data/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

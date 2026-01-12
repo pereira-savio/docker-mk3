@@ -1,0 +1,90 @@
+kind: pipeline
+type: docker
+name: ci-pipeline
+
+trigger:
+  branch:
+    - main
+    - develop
+  event:
+    - push
+    - pull_request
+
+steps:
+  # Passo 1: Build
+  - name: build
+    image: alpine:latest
+    commands:
+      - echo "🔨 Iniciando build..."
+      - echo "Versão da aplicação: ${DRONE_BUILD_NUMBER}"
+      - echo "Branch: ${DRONE_COMMIT_BRANCH}"
+
+  # Passo 2: Testes
+  - name: test
+    image: alpine:latest
+    commands:
+      - echo "🧪 Executando testes..."
+      - echo "Commit: ${DRONE_COMMIT_SHA}"
+      - echo "Autor: ${DRONE_COMMIT_AUTHOR}"
+
+  # Passo 3: Análise de código (exemplo com SonarQube)
+  # Descomente para usar
+  # - name: sonarqube
+  #   image: sonarsource/sonar-scanner-cli:latest
+  #   environment:
+  #     SONAR_HOST_URL: http://sonarqube:9000
+  #     SONAR_LOGIN:
+  #       from_secret: sonar_token
+  #   commands:
+  #     - sonar-scanner
+
+  # Passo 4: Deploy (apenas na branch main)
+  - name: deploy
+    image: alpine:latest
+    commands:
+      - echo "🚀 Deploy iniciado..."
+      - echo "Ambiente: production"
+    when:
+      branch:
+        - main
+      event:
+        - push
+
+  # Passo 5: Notificação (Slack exemplo)
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_webhook
+      channel: "#ci-cd"
+      template: |
+        Build {{build.status}}
+        Repo: {{repo.name}}
+        Branch: {{commit.branch}}
+        Author: {{commit.author}}
+    when:
+      status:
+        - success
+        - failure
+
+---
+# Você pode ter múltiplos pipelines no mesmo arquivo
+kind: pipeline
+type: docker
+name: deployment-pipeline
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
+depends_on:
+  - ci-pipeline
+
+steps:
+  - name: deploy-production
+    image: alpine:latest
+    commands:
+      - echo "🌍 Fazendo deploy em produção..."
+      - echo "Build dependente completado com sucesso"

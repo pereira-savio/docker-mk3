@@ -1,22 +1,43 @@
-version: '3.1'
+version: '3.8'
+
 services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:11.2-alpine
+    hostname: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-homestead}
+      MYSQL_USER: ${MYSQL_USER:-countryadmin}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rock4me}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - global-default
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
-    mariadb:
-        container_name: mariadb
-        image: mariadb:latest
-        volumes:
-            - ./var/mariadb:/var/lib/mysql
-        environment:
-            - MYSQL_ROOT_PASSWORD=secret
-            - MYSQL_DATABASE=homestead
-            - MYSQL_USER=countryadmin
-            - MYSQL_PASSWORD=rock4me
-        ports:
-            - '3306:3306'
+  adminer:
+    image: adminer:4.8.1-standalone
+    container_name: adminer
+    ports:
+      - "8005:8080"
+    networks:
+      - global-default
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
 
-    adminer:
-        image: adminer
-        links:
-            - mariadb
-        ports:
-            - 8005:8080
+volumes:
+  mariadb-data:
+
+networks:
+  global-default:
+    external: true

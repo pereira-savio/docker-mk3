@@ -1,12 +1,26 @@
+version: '3.8'
+
 services:
   uptime-kuma:
     container_name: uptime-kuma
-    image: louislam/uptime-kuma:1
-    restart: always
+    hostname: uptime-kuma
+    image: louislam/uptime-kuma:1.23.13
+    restart: unless-stopped
     ports:
-      - "80:3001"
+      - "${UPTIME_KUMA_PORT:-8443}:3001"
     volumes:
-      - uptime-kuma:/app/data
+      - uptime-kuma-data:/app/data
+    networks:
+      - global-default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  uptime-kuma:
+  uptime-kuma-data:
+
+networks:
+  global-default:
+    external: true

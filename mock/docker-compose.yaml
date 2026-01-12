@@ -1,20 +1,27 @@
-version: '3.1'
-services:
+version: '3.8'
 
+services:
   mock-server:
-    image: mockserver/mockserver:mockserver-5.11.1
+    image: mockserver/mockserver:5.15.0
     container_name: mock-server
+    hostname: mock-server
     command: -logLevel DEBUG
-    networks:
-      - global-default
     ports:
-      - 1080:1080
+      - "1080:1080"
     environment:
       MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
       MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
-      MOCKSERVER_WATCH_INITIALIZATION_JSON: 'true'
+      MOCKSERVER_WATCH_INITIALIZATION_JSON: "true"
     volumes:
       - ./config:/config
+    networks:
+      - global-default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 networks:
   global-default:

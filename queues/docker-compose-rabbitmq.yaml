@@ -1,18 +1,30 @@
-version: '3.1'
-services:
+version: '3.8'
 
+services:
   rabbitmq:
-        image: rabbitmq:3-management
-        container_name: 'rabbitmq'
-        ports:
-            - 5672:5672
-            - 15672:15672
-        volumes:
-            - rabbitmq_data:/var/lib/rabbitmq/
-            - rabbitmq_data:/var/log/rabbitmq
-        networks:
-            - sail
-        restart: unless-stopped
+    image: rabbitmq:3.12-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
+    networks:
+      - global-default
+    healthcheck:
+      test: rabbitmq-diagnostics ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  rabbitmq_data:
+  rabbitmq-data:
+
+networks:
+  global-default:
+    external: true
