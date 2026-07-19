@@ -5,8 +5,8 @@ services:
     ports:
       - 8005:8080
     networks:
-      - global-default
+      - databases-network
 
 networks:
-  global-default:
+  databases-network:
     external: true
