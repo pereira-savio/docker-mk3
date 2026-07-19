@@ -1,0 +1,12 @@
+services:
+  kong:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kong-gateway
+    environment:
+      KONG_DATABASE: "off" # Or use PostgreSQL
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
