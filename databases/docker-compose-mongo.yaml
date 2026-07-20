@@ -1,45 +1,40 @@
 services:
-  mongo:
-    image: mongo:4.4
-    container_name: mongodb
-    hostname: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secret}
+  # MongoDB Service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    restart: unless-stopped
     ports:
       - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    networks:
-      - databases-network
-    healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
-  mongoexpress:
-    image: mongo-express:1.0.2
-    container_name: mongodb-express
-    hostname: mongo-express
     environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-secret}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-secret}@mongo:27017/
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: supersecretpassword
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mongo_network
+
+  # Mongo Express Web GUI Service
+  mongo-express:
+    image: mongo-express:latest
+    container_name: express_container
+    restart: unless-stopped
     ports:
       - "8081:8081"
-    networks:
-      - databases-network
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb_container
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: supersecretpassword
+      ME_CONFIG_BASICAUTH_USERNAME: webadmin
+      ME_CONFIG_BASICAUTH_PASSWORD: webpassword
     depends_on:
-      mongo:
-        condition: service_healthy
-    restart: unless-stopped
+      - mongodb
+    networks:
+      - mongo_network
 
 volumes:
-  mongo-data:
+  mongo_data:
 
 networks:
-  databases-network:
-    external: true
+  mongo_network:
